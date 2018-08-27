@@ -1,19 +1,3 @@
----
-bg: "chardons.jpg "
-layout: post
-date: 2018-08-27
-mathjax: true
-title: "Pre-processing for deep learning: from covariance matrix to image whitening"
-crawlertitle: "Pre-processing for deep learning: from covariance matrix to image whitening"
-categories: posts
-tags: ['linear-algebra', 'python', 'numpy', 'deep-learning']
-author: hadrienj
-jupyter: https://github.com/hadrienj/Preprocessing-for-deep-learning
-excerpt: "The goal of this post/notebook is to go from the basics of data preprocessing to modern techniques used in deep learning. My point is that we can use code to better understand abstract mathematical notions! Thinking by coding! 💥"
-excerpt-image: '<img src="../../assets/images/Preprocessing-for-deep-learning/rotation.png" width="500" alt="Rotation to decorrelate the data" title="The rotation can decorrelate the data.">
-<em>The left plot shows correlated data. For instance, if you take a data point with a big $x$ value, chances are that $y$ will also be quite big. Now take all data points and do a rotation (maybe around 45 degrees counterclockwise): the new data (plotted on the right) is not correlated anymore.</em>'
----
-
 A notebook version of this post can be found [here](https://github.com/hadrienj/Preprocessing-for-deep-learning) on Github.
 
 The goal of this post/notebook is to go from the basics of data preprocessing to modern techniques used in deep learning. My point is that we can use code (Python/Numpy etc.) to better understand abstract mathematical notions! Thinking by coding! 💥
@@ -40,111 +24,87 @@ Feel free to fork the notebook. For instance, check the shapes of the matrices e
 
 The variance of a variable describes how much the values are spread. The covariance is a measure that tells the amount of dependency between two variables. A positive covariance means that values of the first variable are large when values of the second variables are also large. A negative covariance means the opposite: large values from one variable are associated with small values of the other. The covariance value depends on the scale of the variable so it is hard to analyse it. It is possible to use the correlation coefficient that is easier to interpret. It is just the covariance normalized.
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/negative-and-positive-covariance.png" width="500" alt="Intuition about the covariance between two variables" title="Representation of the covariance between two variables.">
+<img src="images/negative-and-positive-covariance.png" width="500" alt="Intuition about the covariance between two variables" title="Representation of the covariance between two variables.">
 <em>A positive covariance means that large values of one variable are associated with big values from the other (left). A negative covariance means that large values of one variable are associated with small values of the other one (right).</em>
 
 The covariance matrix is a matrix that summarizes the variances and covariances of a set of vectors and it can tell a lot of things about your variables. The diagonal corresponds to the variance of each vector:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/covariance1.png" width="400" alt="Variance in the matrix of covariance" title="Variance in the matrix of covariance is on the diagonal">
-<em>A matrix $\bs{A}$ and its matrix of covariance. The diagonal corresponds to the variance of each column vector.</em>
+<img src="images/covariance1.png" width="400" alt="Variance in the matrix of covariance" title="Variance in the matrix of covariance is on the diagonal">
+<em>A matrix A and its matrix of covariance. The diagonal corresponds to the variance of each column vector.</em>
 
 Let's just check with the formula of the variance:
 
-<div>
-$$
-V(\bs{X}) = \frac{1}{n}\sum_{i=1}^{n}(x_i-\bar{x})^2
-$$
-</div>
+<img src="images/eqs/eq1.png">
 
-with $n$ the length of the vector, and $\bar{x}$ the mean of the vector. For instance, the variance of the first column vector of $\bs{A}$ is:
+with *n* the length of the vector, and x̅ the mean of the vector. For instance, the variance of the first column vector of ***A*** is:
 
-<div>
-$$
-V(\bs{A}_{:,1}) = \frac{(1-3)^2+(5-3)^2+(3-3)^2}{3} = 2.67
-$$
-</div>
+<img src="images/eqs/eq2.png">
 
 
   
-This is the first cell of our covariance matrix. The second element on the diagonal corresponds of the variance of the second column vector from $\bs{A}$ and so on.
+This is the first cell of our covariance matrix. The second element on the diagonal corresponds of the variance of the second column vector from ***A*** and so on.
 
-*Note*: the vectors extracted from the matrix $\bs{A}$ correspond to the columns of $\bs{A}$.
+*Note*: the vectors extracted from the matrix ***A*** correspond to the columns of ***A***.
 
-### Covariance
+The other cells correspond to the covariance between two column vectors from ***A***. For instance, the covariance between the first and the third column is located in the covariance matrix as the column 1 and the row 3 (or the column 3 and the row 1).
 
-The other cells correspond to the covariance between two column vectors from $\bs{A}$. For instance, the covariance between the first and the third column is located in the covariance matrix as the column 1 and the row 3 (or the column 3 and the row 1).
-
-<img src="../../assets/images/Preprocessing-for-deep-learning/covariance2.png" width="400" alt="Covariance in the matrix of covariance" title="The position in the covariance matrix.">
-<em>The position in the covariance matrix. Column corresponds to the first variable and row to the second (or the opposite). The covariance between the first and the third column vector of $\bs{A}$ is the element in column 1 and row 3 (or the opposite = same value).</em>
+<img src="images/covariance2.png" width="400" alt="Covariance in the matrix of covariance" title="The position in the covariance matrix.">
+<em>The position in the covariance matrix. Column corresponds to the first variable and row to the second (or the opposite). The covariance between the first and the third column vector of A is the element in column 1 and row 3 (or the opposite = same value).</em>
 
 
 
   
-Let's check that the covariance between the first and the third column vector of $\bs{A}$ is equal to $-2.67$. The formula of the covariance between two variables $\bs{X}$ and $\bs{Y}$ is:
+Let's check that the covariance between the first and the third column vector of ***A*** is equal to -2.67. The formula of the covariance between two variables ***X*** and ***Y*** is:
 
-<div>
-$$
-cov(\bs{X},\bs{Y}) = \frac{1}{n} \sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})
-$$
-</div>
+<img src="images/eqs/eq3.png">
 
-The variables $\bs{X}$ and $\bs{Y}$ are the first and the third column vectors in the last example. Let's split this formula to be sure that it is crystal clear:
+The variables ***X*** and ***Y*** are the first and the third column vectors in the last example. Let's split this formula to be sure that it is crystal clear:
 
-1. $(x_1-\bar{x})$. The sum symbol means that we will iterate on the elements of the vectors. We will start with the first element ($i=1$) and calculate the first element of $\bs{X}$ minus the mean of the vector $\bs{X}$.
-2. $(x_1-\bar{x})(y_1-\bar{y})$. Multiply the result with the first element of $\bs{Y}$ minus the mean of the vector $\bs{Y}$.
-3. $\sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})$. Reiterate the process for each element of the vectors and calculate the sum of all results.
-4. $\frac{1}{n} \sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})$. Divide by the number of elements in the vector.
+
+
+<img src="images/eqs/eq4.png">
+
+1. The sum symbol means that we will iterate on the elements of the vectors. We will start with the first element (i=1) and calculate the first element of ***X*** minus the mean of the vector ***X***.
+
+
+
+<img src="images/eqs/eq5.png">
+
+2. Multiply the result with the first element of ***Y*** minus the mean of the vector ***Y***.
+
+
+
+<img src="images/eqs/eq6.png">
+
+3. Reiterate the process for each element of the vectors and calculate the sum of all results.
+
+
+
+<img src="images/eqs/eq7.png">
+
+4. Divide by the number of elements in the vector.
 
 
 #### Example 1.
 
-Let's start with the matrix $\bs{A}$:
+Let's start with the matrix ***A***:
 
-<div>
-$$
-\boldsymbol{A}=
-\begin{bmatrix}
-    1 & 3 & 5\\\\
-    5 & 4 & 1\\\\
-    3 & 8 & 6
-\end{bmatrix}
-$$
-</div>
+<img src="images/eqs/eq8.png">
 
 We will calculate the covariance between the first and the third column vectors:
 
-<div>
-$$
-\boldsymbol{X} = \begin{bmatrix}
-    1\\\\
-    5\\\\
-    3
-\end{bmatrix}
-$$
-</div>
+<img src="images/eqs/eq9.png">
 
 and
 
-<div>
-$$\boldsymbol{Y} = \begin{bmatrix}
-    5\\\\
-    1\\\\
-    6
-\end{bmatrix}
-$$
-</div>
+<img src="images/eqs/eq10.png">
 
-$\boldsymbol{\bar{x}}=3$, $\boldsymbol{\bar{y}}=4$ and $n=3$ so we have:
 
-<div>
-$$
-cov(X,Y) = \frac{(1-3)(5-4)+(5-3)(1-4)+(3-3)(6-4)}{3}=\frac{-8}{3}=-2.67
-$$
-</div>
+<img src="images/eqs/eq11.png">
 
 Ok, great! That the value of the covariance matrix.
 
-Now the easy way! With Numpy, the covariance matrix can be calculated with the function `np.cov`. It is worth noting that if you want Numpy to use the columns as vectors, the parameter `rowvar=False` has to be used. Also, `bias=True` allows to divide by $n$ and not by $n-1$.
+Now the easy way! With Numpy, the covariance matrix can be calculated with the function `np.cov`. It is worth noting that if you want Numpy to use the columns as vectors, the parameter `rowvar=False` has to be used. Also, `bias=True` allows to divide by *n* and not by *n*-1.
 
 Let's create the array first:
 
@@ -199,8 +159,7 @@ Looks good!
   
 ### Finding the covariance matrix with the dot product
 
-There is another way to compute the covariance matrix of $\bs{A}$. You can center $
-\bs{A}$ around 0 (subtract the mean of the vector to each element of the vector to have a vector of mean equal to 0, *cf*. below), multiply it with its own transpose and divide by the number of observations. Let's start with an implementation and then we'll try to understand the link with the previous equation:
+There is another way to compute the covariance matrix of ***A***. You can center ***A*** around 0 (subtract the mean of the vector to each element of the vector to have a vector of mean equal to 0, *cf*. below), multiply it with its own transpose and divide by the number of observations. Let's start with an implementation and then we'll try to understand the link with the previous equation:
 
 
   
@@ -217,7 +176,7 @@ def calculateCovariance(X):
 
 
   
-Let's test it on our matrix $\boldsymbol{A}$:
+Let's test it on our matrix ***A***:
 
 
   
@@ -244,38 +203,27 @@ We end up with the same result as before!
 
 The explanation is simple. The dot product between two vectors can be expressed:
 
-<div>
-$$
-\bs{X^\text{T}Y}= \sum_{i=1}^{n}(x_i)(y_i)
-$$
-</div>
+<img src="images/eqs/eq12.png">
 
 That's right, it is the sum of the products of each element of the vectors:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/dot-product.png" width="400" alt="The dot product corresponds to the sum of the products of each elements of the vectors" title="The dot product.">
+<img src="images/dot-product.png" width="400" alt="The dot product corresponds to the sum of the products of each elements of the vectors" title="The dot product.">
 <em>The dot product corresponds to the sum of the products of each element of the vectors.</em>
 
-If $n$ is the number of elements in our vectors and that we divide by $n$:
+If *n* is the number of elements in our vectors and that we divide by *n*:
 
-<div>
-$$
-\frac{1}{n}\bs{X^\text{T}Y}= \frac{1}{n}\sum_{i=1}^{n}(x_i)(y_i)
-$$
-</div>
+
+<img src="images/eqs/eq13.png">
 
 You can note that this is not too far from the formula of the covariance we have seen above:
 
-<div>
-$$
-cov(\bs{X},\bs{Y}) = \frac{1}{n} \sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})
-$$
-</div>
+<img src="images/eqs/eq14.png">
 
 The only difference is that in the covariance formula we subtract the mean of a vector to each of its elements. This is why we need to center the data before doing the dot product.
 
-Now if we have a matrix $\bs{A}$, the dot product between $\bs{A}$ and its transpose will give you a new matrix:
+Now if we have a matrix ***A***, the dot product between ***A*** and its transpose will give you a new matrix:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/covariance-dot-product.png" width="400" alt="Covariance matrix and dot product" title="Covariance matrix and dot product.">
+<img src="images/covariance-dot-product.png" width="400" alt="Covariance matrix and dot product" title="Covariance matrix and dot product.">
 <em>If you start with a zero-centered matrix, the dot product between this matrix and its transpose will give you the variance of each vector and covariance between them, that is to say the covariance matrix.</em>
 
 This is the covariance matrix! 🌵
@@ -328,7 +276,7 @@ def plotDataAndCov(data):
 
 Now that we have the plot function, we will generate some random data to visualize what the covariance matrice can tell us. We will start with some data drawn from a normal distribution with the Numpy function `np.random.normal()`.
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/np.random.normal.png" width="400" alt="Parameters of numpy random normal" title="Parameters of Numpy random normal.">
+<img src="images/np.random.normal.png" width="400" alt="Parameters of numpy random normal" title="Parameters of Numpy random normal.">
 <em>Drawing sample from a normal distribution with Numpy.</em>
 
 This function needs the mean, the standard deviation and the number of observations of the distribution as input. We will create two random variables of 300 observations with a standard deviation of 1. The first will have a mean of 1 and the second a mean of 2. If we draw two times 300 observations from a normal distribution, both vectors will be uncorrelated.
@@ -407,7 +355,7 @@ plt.close()
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_24_0.png">
+<img src="images/Preprocessing-for-deep-learning_24_0.png">
 
 
 
@@ -439,7 +387,7 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_27_1.png">
+<img src="images/Preprocessing-for-deep-learning_27_1.png">
 
 
 
@@ -477,13 +425,13 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_30_1.png">
+<img src="images/Preprocessing-for-deep-learning_30_1.png">
 
 
 
 
   
-The correlation between the two dimensions is visible on the scatter plot. We can see that a line could be drawn and used to predict $\boldsymbol{y}$ from $\boldsymbol{x}$ and vice versa. The covariance matrix is not diagonal (there are non-zero cells outside of the diagonal). That means that the covariance between dimensions is non-zero.
+The correlation between the two dimensions is visible on the scatter plot. We can see that a line could be drawn and used to predict ***y*** from ***x*** and vice versa. The covariance matrix is not diagonal (there are non-zero cells outside of the diagonal). That means that the covariance between dimensions is non-zero.
 
 That's great! ⚡️ We now have all the tools to see different preprocessing techniques.
 
@@ -495,13 +443,9 @@ That's great! ⚡️ We now have all the tools to see different preprocessing te
 
 Mean normalization is just removing the mean from each observation.
 
-<div>
-$$
-\bs{X'} = \bs{X} - \bar{x}
-$$
-</div>
+<img src="images/eqs/eq15.png">
 
-where $\bs{X'}$ is the normalized dataset, $\bs{X}$ the original dataset and $\bar{x}$ the mean of $\bs{X}$.
+where ***X'*** is the normalized dataset, ***X*** the original dataset and x̅ the mean of ***X***.
 
 It will have the effect of centering the data around 0. We will create the function `center()` to do that:
 
@@ -517,7 +461,7 @@ def center(X):
 
 
   
-Let's give it a try with the matrix $\bs{B}$ we have created above:
+Let's give it a try with the matrix ***B*** we have created above:
 
 
   
@@ -552,7 +496,7 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_35_1.png">
+<img src="images/Preprocessing-for-deep-learning_35_1.png">
 
 
 <pre class='output'>
@@ -568,13 +512,13 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_35_3.png">
+<img src="images/Preprocessing-for-deep-learning_35_3.png">
 
 
 
 
   
-The first plot shows again the original data $\bs{B}$ and the second plot shows the centered data (look at the scale).
+The first plot shows again the original data ***B*** and the second plot shows the centered data (look at the scale).
 
 
   
@@ -582,13 +526,10 @@ The first plot shows again the original data $\bs{B}$ and the second plot shows 
 
 The standardization is used to put all features on the same scale. The way to do it is to divide each zero-centered dimension by its standard deviation.
 
-<div>
-$$
-\bs{X'} = \frac{\bs{X} - \bar{x}}{\sigma_{\bs{X}}}
-$$
-</div>
+<img src="images/eqs/eq16.png">
 
-where $\bs{X'}$ is the standardized dataset, $\bs{X}$ the original dataset, $\bar{x}$ the mean of $\bs{X}$ and $\sigma_{\bs{X}}$ the standard deviation of $\bs{X}$.
+
+where ***X'*** is the standardized dataset, ***X*** the original dataset, x̅ the mean of ***X*** and σ the standard deviation of ***X***.
 
 
   
@@ -631,13 +572,13 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_40_1.png">
+<img src="images/Preprocessing-for-deep-learning_40_1.png">
 
 
 
 
   
-We can see that the scales of $x$ and $y$ are different. Note also that the correlation seems smaller because of the scale differences. Now let's standardise it:
+We can see that the scales of ***x*** and ***y*** are different. Note also that the correlation seems smaller because of the scale differences. Now let's standardise it:
 
 
   
@@ -661,13 +602,13 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_42_1.png">
+<img src="images/Preprocessing-for-deep-learning_42_1.png">
 
 
 
 
   
-Looks good! You can see that the scales are the same and that the dataset is zero-centered according to both axes. Now, have a look at the covariance matrix: you can see that the variance of each coordinate (the top-left cell and the bottom-right cell) is equal to 1. By the way, this new covariance matrix is actually the correlation matrix!💥 The Pearson correlation coefficient between the two variables ($\bs{c1}$ and $\bs{c2}$) is 0.54220151.
+Looks good! You can see that the scales are the same and that the dataset is zero-centered according to both axes. Now, have a look at the covariance matrix: you can see that the variance of each coordinate (the top-left cell and the bottom-right cell) is equal to 1. By the way, this new covariance matrix is actually the correlation matrix!💥 The Pearson correlation coefficient between the two variables (***c1*** and ***c2***) is 0.54220151.
 
 
   
@@ -681,7 +622,7 @@ Whitening is a bit more complicated but we now have all the tools that we need t
     2- Decorrelate the data
     3- Rescale the data
     
-Let's take again $\bs{C}$ and try to do these steps.
+Let's take again ***C*** and try to do these steps.
 
 #### 1. Zero-centering
 
@@ -707,7 +648,7 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_45_1.png">
+<img src="images/Preprocessing-for-deep-learning_45_1.png">
 
 
 
@@ -717,12 +658,12 @@ Covariance matrix:
 
 At this point, we need to decorrelate our data. Intuitively, it means that we want to rotate the data until there is no correlation anymore. Look at the following cartoon to see what I mean:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/rotation.png" width="500" alt="Rotation to decorrelate the data" title="The rotation can decorrelate the data.">
-<em>The left plot shows correlated data. For instance, if you take a data point with a big $x$ value, chances are that $y$ will also be quite big. Now take all data points and do a rotation (maybe around 45 degrees counterclockwise): the new data (plotted on the right) is not correlated anymore.</em>
+<img src="images/rotation.png" width="500" alt="Rotation to decorrelate the data" title="The rotation can decorrelate the data.">
+<em>The left plot shows correlated data. For instance, if you take a data point with a big x value, chances are that y will also be quite big. Now take all data points and do a rotation (maybe around 45 degrees counterclockwise): the new data (plotted on the right) is not correlated anymore.</em>
 
 The question is: how could we find the right rotation in order to get the uncorrelated data? Actually, it is exactly what the **eigenvectors** of the covariance matrix do: they indicate the direction where the spread of the data is at its maximum:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/maxVar.png" width="300" alt="Direction where the variance is maximum" title="There is one direction where the variance is maximum.">
+<img src="images/maxVar.png" width="300" alt="Direction where the variance is maximum" title="There is one direction where the variance is maximum.">
 <em>The eigenvectors of the covariance matrix give you the direction that maximizes the variance. The direction of the green line is where the variance is maximum. Just look at the smallest and largest point projected on this line: the spread is big. Compare that with the projection on the orange line: the spread is very small.</em>
 
 For more details about the eigendecomposition, see [this post](https://hadrienj.github.io/posts/Deep-Learning-Book-Series-2.7-Eigendecomposition/).
@@ -752,7 +693,7 @@ def decorrelate(X):
 
 
   
-Let's try to decorrelate our zero-centered matrix $\bs{C}$ to see it in action:
+Let's try to decorrelate our zero-centered matrix ***C*** to see it in action:
 
 
   
@@ -781,7 +722,7 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_49_1.png">
+<img src="images/Preprocessing-for-deep-learning_49_1.png">
 
 
 <pre class='output'>
@@ -794,7 +735,7 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_49_3.png">
+<img src="images/Preprocessing-for-deep-learning_49_3.png">
 
 
 
@@ -829,7 +770,7 @@ def whiten(X):
 
 
   
-*Note:* we add a small value (here $10^{-5}$) to avoid the division by $0$.
+*Note:* we add a small value (here 10^-5) to avoid the division by 0.
 
 
   
@@ -857,13 +798,13 @@ Covariance matrix:
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_54_1.png">
+<img src="images/Preprocessing-for-deep-learning_54_1.png">
 
 
 
 
   
-Hooray! We can see that with the covariance matrix that this is all good. We have something that really looks to the identity matrix ($1$ on the diagonal and $0$ elsewhere). 🌵
+Hooray! We can see that with the covariance matrix that this is all good. We have something that really looks to the identity matrix (1 on the diagonal and 0 elsewhere). 🌵
 
 
   
@@ -873,7 +814,7 @@ We will see how whitening can be applied to preprocess image dataset. To do so w
 
 Check out the paper, but here is the kind of result they got:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/whitening-images-cifar10-pal-sudeep.png" width="800" alt="Whitening images from the CIFAR10 dataset. Results from the paper of Pal & Sudeep (2016).">
+<img src="images/whitening-images-cifar10-pal-sudeep.png" width="800" alt="Whitening images from the CIFAR10 dataset. Results from the paper of Pal & Sudeep (2016).">
 <em>Whitening images from the CIFAR10 dataset. Results from the paper of Pal & Sudeep (2016). The original images (left) and the images after the ZCA (right) are shown.</em>
 
 First thing first: we will load images from the CIFAR dataset. This dataset is available from Keras but you can also download it [here](https://www.cs.toronto.edu/~kriz/cifar.html).
@@ -922,7 +863,7 @@ print X.shape
 
 
   
-That's better! Now we will reshape the array to have flat image data with one image per row. Each image will be (1, 3072) because $32 \times 32 \times 3 = 3072$. Thus, the array containing all images will be (1000, 3072):
+That's better! Now we will reshape the array to have flat image data with one image per row. Each image will be (1, 3072) because 32 x 32 x 3 = 3072. Thus, the array containing all images will be (1000, 3072):
 
 
   
@@ -941,7 +882,7 @@ print X.shape
 
 
   
-The next step is to be able to see the images. The function `imshow()` from Matplotlib ([doc](https://matplotlib.org/api/_as_gen/matplotlib.pyplot.imshow.html)) can be used to show images. It needs images with the shape ($M \times N \times 3$) so let's create a function to reshape the images and be able to visualize them from the shape (1, 3072).
+The next step is to be able to see the images. The function `imshow()` from Matplotlib ([doc](https://matplotlib.org/api/_as_gen/matplotlib.pyplot.imshow.html)) can be used to show images. It needs images with the shape (M x N x 3) so let's create a function to reshape the images and be able to visualize them from the shape (1, 3072).
 
 
   
@@ -969,7 +910,7 @@ plotImage(X[12, :])
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_65_0.png">
+<img src="images/Preprocessing-for-deep-learning_65_0.png">
 
 
 
@@ -985,15 +926,12 @@ We can now implement the whitening of the images. [Pal & Sudeep (2016)](https://
 
 Remind that the formula to obtain the range [0, 1] is:
 
-<div>
-$$\frac{data - min(data)}{max(data) - min(data)}$$
-</div>
+<img src="images/eqs/eq17.png">
+
 
 but here, the minimum value is 0, so this leads to:
 
-<div>
-$$\frac{data}{max(data)} = \frac{data}{255}$$
-</div>
+<img src="images/eqs/eq18.png">
 
 
   
@@ -1026,7 +964,7 @@ One way to do it is to take each image and remove the mean of this image from ev
 
 Another way to do it is to take each of the 3072 pixels that we have (32 by 32 pixels for R, G and B) for every image and subtract the mean of that pixel across all images. This is called per-pixel mean subtraction. This time, each pixel will be centered around 0 *according to all images*. When you will feed your network with the images, each pixel is considered as a different feature. With the per-pixel mean subtraction, we have centered each feature (pixel) around 0. This technique is commonly used (e.g [Wan et al., 2013](http://proceedings.mlr.press/v28/wan13.html)).
 
-We will now do the per-pixel mean subtraction from our 1000 images. Our data are organized with these dimensions (images, pixels). It was (1000, 3072) because there are 1000 images with $32 \times 32 \times 3 = 3072$ pixels. The mean per-pixel can thus be obtained from the first axis:
+We will now do the per-pixel mean subtraction from our 1000 images. Our data are organized with these dimensions (images, pixels). It was (1000, 3072) because there are 1000 images with 32 x 32 x 3 = 3072 pixels. The mean per-pixel can thus be obtained from the first axis:
 
 
   
@@ -1107,7 +1045,7 @@ This is not exactly 0 but it is small enough that we can consider that it worked
 
 
   
-Now we want to calculate the covariance matrix of the zero-centered data. Like we have seen above, we can calculate it with the `np.cov()` function from Numpy. Please note that our variables are our different images. This implies that the variables are the rows of the matrix $\bs{X}$. Just to be clear, we will tell this information to Numpy with the parameter `rowvar=TRUE` even if it is `True` by default (see the [doc](https://docs.scipy.org/doc/numpy/reference/generated/numpy.cov.html)):
+Now we want to calculate the covariance matrix of the zero-centered data. Like we have seen above, we can calculate it with the `np.cov()` function from Numpy. Please note that our variables are our different images. This implies that the variables are the rows of the matrix ***X***. Just to be clear, we will tell this information to Numpy with the parameter `rowvar=TRUE` even if it is `True` by default (see the [doc](https://docs.scipy.org/doc/numpy/reference/generated/numpy.cov.html)):
 
 
   
@@ -1135,13 +1073,9 @@ U,S,V = np.linalg.svd(cov)
   
 In the paper, they used the following equation:
 
-<div>
-$$
-\bs{X}_{ZCA} = \bs{U}.diag(\frac{1}{\sqrt{diag(\bs{S}) + \epsilon}}).\bs{U^\text{T}.X}
-$$
-</div>
+<img src="images/eqs/eq19.png">
 
-with $\bs{U}$ the left singular vectors, and $\bs{S}$ the singular values of the covariance of the initial normalized dataset of images and $\bs{X}$ the normalized dataset. $\epsilon$ is an hyper-parameter called the whitening coefficient. $diag(a)$ corresponds to a matrix with the vector $a$ as a diagonal and 0 in all other cells.
+with ***U*** the left singular vectors, and ***S*** the singular values of the covariance of the initial normalized dataset of images and ***X*** the normalized dataset. ϵ is an hyper-parameter called the whitening coefficient. diag(a) corresponds to a matrix with the vector a as a diagonal and 0 in all other cells.
 
 We will try to implement this equation. Let's start by checking the dimensions of the SVD:
 
@@ -1161,7 +1095,7 @@ print U.shape, S.shape
 
 
   
-$\bs{S}$ is a vector containing 1000 elements (the singular values). $diag(\bs{S})$ will thus be of shape (1000, 1000) with $\bs{S}$ as the diagonal:
+***S*** is a vector containing 1000 elements (the singular values). diag(***S***) will thus be of shape (1000, 1000) with ***S*** as the diagonal:
 
 
   
@@ -1193,14 +1127,11 @@ shape: (1000, 1000)
 
 
 
-  
-$diag(\frac{1}{\sqrt{diag(\bs{S}) + \epsilon}})$ is also of shape (1000, 1000) as well as $\bs{U}$ and $\bs{U^{\text{T}}}$. We have seen also that $\bs{X}$ has the shape (1000, 3072). The shape of $\bs{X}_{ZCA}$ is thus:
+<img src="images/eqs/eq20.png">
 
-<div>
-$$
-(1000, 1000) . (1000, 1000) . (1000, 3072) = (1000, 1000) . (1000, 3072) = (1000, 3072)
-$$
-</div>
+is also of shape (1000, 1000) as well as ***U*** and ***U***^T. We have seen also that ***X*** has the shape (1000, 3072). The shape of ***X***_ZCA is thus:
+
+<img src="images/eqs/eq21.png">
 
 which corresponds to the shape of the initial dataset. Nice!
 
@@ -1226,13 +1157,13 @@ plotImage(X_ZCA[12, :])
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_88_0.png">
+<img src="images/Preprocessing-for-deep-learning_88_0.png">
 
 
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_88_1.png">
+<img src="images/Preprocessing-for-deep-learning_88_1.png">
 
 
 
@@ -1264,21 +1195,21 @@ plotImage(X_ZCA_rescaled[12, :])
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_90_0.png">
+<img src="images/Preprocessing-for-deep-learning_90_0.png">
 
 
 
 
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/Preprocessing-for-deep-learning_90_1.png">
+<img src="images/Preprocessing-for-deep-learning_90_1.png">
 
 
 
 
   
-Hooray! That's great!⚡️It looks like the images from the paper. Actually, they have used 10000 images and not 1000 like us. To see the differences in the results according to the number of images that you use and the effect of the hyper-parameter $\epsilon$, here are the results for different values:
+Hooray! That's great!⚡️It looks like the images from the paper. Actually, they have used 10000 images and not 1000 like us. To see the differences in the results according to the number of images that you use and the effect of the hyper-parameter ϵ, here are the results for different values:
 
-<img src="../../assets/images/Preprocessing-for-deep-learning/result-image-whitening-cifar10.png" width="400" alt="Different values of epsilon and different number of images used">
+<img src="images/result-image-whitening-cifar10.png" width="400" alt="Different values of epsilon and different number of images used">
 <em>The result of the whitening is different according to the number of images that we are using and the value of the hyper-parameter epsilon. The image on the left is the original image. In the paper, [Pal & Sudeep (2016)](https://ieeexplore.ieee.org/document/7808140/) used 10000 images and epsilon = 0.1. This corresponds to the bottom left image.</em>
 
 
