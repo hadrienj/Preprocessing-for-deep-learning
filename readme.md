@@ -1,4 +1,4 @@
-A blog post version of this notebook can be found [here](https://hadrienj.github.io/posts/Preprocessing-for-deep-learning/) on Github.
+A blog post version of this notebook can be found [here](https://hadrienj.github.io/posts/Preprocessing-for-deep-learning/). The content of the notebook is displayed below:
 
 The goal of this post/notebook is to go from the basics of data preprocessing to modern techniques used in deep learning. My point is that we can use code (Python/Numpy etc.) to better understand abstract mathematical notions! Thinking by coding! 💥
 
