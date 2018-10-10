@@ -683,7 +683,7 @@ Let's pack that into a function:
 ```python
 def decorrelate(X):
     newX = center(X)
-    cov = X.T.dot(X)/float(X.shape[0])
+    cov = newX.T.dot(newX)/float(X.shape[0])
     # Calculate the eigenvalues and eigenvectors of the covariance matrix
     eigVals, eigVecs = np.linalg.eig(cov)
     # Apply the eigenvectors to X
